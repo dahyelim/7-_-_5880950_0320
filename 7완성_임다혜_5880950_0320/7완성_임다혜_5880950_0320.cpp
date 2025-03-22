@@ -41,7 +41,7 @@ float calculate(char* expression) {
     float currentNum = 0.0;
     char current_operator = '+'; // 초기 연산자는 덧셈
 
-    // 첫 번째 연산: 곱셈과 나눗셈을 먼저 처리
+    // 우선순위 처리: 곱셈과 나눗셈을 먼저 처리하는 로직
     for (int i = 0; i < strlen(expression); i++) {
         if (isdigit(expression[i])) {
             currentNum = currentNum * 10 + (expression[i] - '0');
@@ -60,7 +60,7 @@ float calculate(char* expression) {
         }
 
         // 연산자가 나오거나 문자열 끝에 도달하면 처리
-        if (!isdigit(expression[i]) && expression[i] != ' ' || i == strlen(expression) - 1) {
+        if ((!isdigit(expression[i]) && expression[i] != ' ') || i == strlen(expression) - 1) {
             if (current_operator == '+') {
                 result += currentNum;
             }
