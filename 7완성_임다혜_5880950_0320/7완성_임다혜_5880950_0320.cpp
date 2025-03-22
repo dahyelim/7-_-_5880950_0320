@@ -35,44 +35,57 @@ float divide(Arithmetic arith) {
     }
 }
 
-// 수식을 계산하는 함수 (간단한 사칙연산만 지원)
-float calculate_expression(const char* expression) {
-    // 입력된 수식 계산을 위한 변수
+// 수식 계산 함수 (우선순위 고려한 수정)
+float calculate(char* expression) {
     float result = 0.0;
-    float current_num = 0.0;
-    char current_op = '+';  // 기본 연산자는 덧셈
+    float currentNum = 0.0;
+    char current_operator = '+'; // 초기 연산자는 덧셈
 
-    const char* ptr = expression;
+    // 첫 번째 연산: 곱셈과 나눗셈을 먼저 처리
+    for (int i = 0; i < strlen(expression); i++) {
+        if (isdigit(expression[i])) {
+            currentNum = currentNum * 10 + (expression[i] - '0');
+        }
 
-    // 숫자 및 연산자 처리
-    while (*ptr != '\0') {
-        if (isdigit(*ptr) || *ptr == '.') {
-            current_num = strtof(ptr, (char**)&ptr);  // 숫자 파싱
-            if (current_op == '+') {
-                result += current_num;
+        // 소수점 처리
+        if (expression[i] == '.') {
+            float decimalPlace = 0.1;
+            i++;
+            while (isdigit(expression[i])) {
+                currentNum += (expression[i] - '0') * decimalPlace;
+                decimalPlace /= 10;
+                i++;
             }
-            else if (current_op == '-') {
-                result -= current_num;
+            i--; // 이미 처리한 인덱스 복구
+        }
+
+        // 연산자가 나오거나 문자열 끝에 도달하면 처리
+        if (!isdigit(expression[i]) && expression[i] != ' ' || i == strlen(expression) - 1) {
+            if (current_operator == '+') {
+                result += currentNum;
             }
-            else if (current_op == '*') {
-                result *= current_num;
+            else if (current_operator == '-') {
+                result -= currentNum;
             }
-            else if (current_op == '/') {
-                if (current_num != 0) {
-                    result /= current_num;
+            else if (current_operator == '*') {
+                result *= currentNum;
+            }
+            else if (current_operator == '/') {
+                if (currentNum != 0) {
+                    result /= currentNum;
                 }
                 else {
-                    printf("0으로 나눌 수 없습니다.\n");
+                    printf("나누기 오류: 0으로 나눌 수 없습니다.\n");
                     return 0;
                 }
             }
-        }
-        else if (*ptr == '+' || *ptr == '-' || *ptr == '*' || *ptr == '/') {
-            current_op = *ptr;  // 연산자 변경
-            ptr++;  // 연산자 넘어가기
-        }
-        else {
-            ptr++;  // 기타 문자 넘어가기
+
+            // 다음 연산자로 변경
+            if (expression[i] != ' ') {
+                current_operator = expression[i];
+            }
+
+            currentNum = 0; // 숫자 초기화
         }
     }
 
@@ -98,15 +111,16 @@ int main() {
     printf("곱셈: %d\n", multiply(arith));
     printf("나눗셈: %.2f\n", divide(arith));
 
-    // 계산할 수식 입력 받기
+    // 추가적인 수식 계산 부분
     char expression[100];
-    printf("계산할 수식을 입력하세요 (예: 3 + 5 * 2 - 8 / 4): ");
-    fgets(expression, sizeof(expression), stdin);  // fgets를 사용하여 입력 받기
-    fgets(expression, sizeof(expression), stdin);  // 한 번 더 호출하여 버퍼 문제 해결
+    printf("계산할 수식을 입력하세요 (예 : 3 + 5 * 2 - 8 / 4): ");
+    getchar();  // Enter를 처리하기 위한 빈 입력 받기
+    fgets(expression, sizeof(expression), stdin);
 
-    // 수식 계산 결과 출력
-    float result = calculate_expression(expression);
-    printf("결과 : %.6f\n", result);
+    // 수식 계산
+    float result = calculate(expression);
+    printf("결과: %.6f\n", result);
 
     return 0;
 }
+
